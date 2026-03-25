@@ -1,0 +1,27 @@
+# Node
+node_modules/
+dist/
+.env
+.env.local
+
+# Spring Boot
+*.class
+*.jar
+target/
+.gradle/
+build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
