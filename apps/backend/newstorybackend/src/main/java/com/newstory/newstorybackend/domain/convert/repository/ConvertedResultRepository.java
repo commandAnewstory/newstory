@@ -13,4 +13,6 @@ public interface ConvertedResultRepository extends JpaRepository<ConvertedResult
     Optional<ConvertedResult> findByArticleIdAndUserIdAndStyle(
         Long articleId, Long userId, String style
     );
+
+    List<ConvertedResult> findByIsFeedTrueAndStyleOrderByCreatedAtDesc(String style);
 }
