@@ -78,6 +78,7 @@ public class NewsService {
         if (url == null) return null;
         try {
             String host = new java.net.URL(url).getHost();
+            if (host == null) return null;
             return host.replace("www.", "");
         } catch (Exception e) {
             return null;
