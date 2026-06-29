@@ -1,7 +1,7 @@
 import useAuthStore from '../store/authStore';
 import { refresh as apiRefresh } from './auth';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.REACT_APP_API_URL ?? 'http://localhost:8080';
 
 interface ApiResponse<T> {
   success: boolean;
