@@ -28,6 +28,7 @@ public class NewsFeedResponse {
         private final String description;
         private final String source;
         private final LocalDateTime publishedAt;
+        private final LocalDateTime createdAt;
         private final String url;
 
         public NewsArticleDto(NewsArticle article) {
@@ -36,6 +37,7 @@ public class NewsFeedResponse {
             this.description = article.getDescription();
             this.source = article.getSource();
             this.publishedAt = article.getPublishedAt();
+            this.createdAt = article.getCreatedAt();
             this.url = article.getUrl();
         }
     }

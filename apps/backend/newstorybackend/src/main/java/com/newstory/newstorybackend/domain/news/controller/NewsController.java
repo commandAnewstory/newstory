@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/news")
 @RequiredArgsConstructor
@@ -21,5 +23,16 @@ public class NewsController {
     ) {
         NewsFeedResponse response = newsService.getFeed(page, size);
         return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<ApiResponse<List<NewsFeedResponse.NewsArticleDto>>> getPopular() {
+        return ResponseEntity.ok(ApiResponse.ok(newsService.getPopularThisWeek()));
+    }
+
+    @PostMapping("/{id}/view")
+    public ResponseEntity<ApiResponse<Void>> recordView(@PathVariable Long id) {
+        newsService.recordView(id);
+        return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

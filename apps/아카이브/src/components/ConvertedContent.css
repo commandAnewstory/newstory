@@ -1,0 +1,106 @@
+/* ── 카드뉴스 ───────────────────────────── */
+.card-news-view { }
+
+.card-news-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--sapphire);
+}
+
+.card-news-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 700px) {
+  .card-news-grid { grid-template-columns: 1fr; }
+}
+
+.card-news-card {
+  background: var(--white);
+  border: 1.5px solid var(--sapphire-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: box-shadow 0.15s;
+}
+.card-news-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+.card-news-card-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sapphire);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--sapphire-border);
+}
+
+.card-news-card-body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--gray-700);
+}
+
+.card-news-card-body p { margin-bottom: 8px; }
+.card-news-card-body ul { padding-left: 0; list-style: none; }
+.card-news-card-body li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  gap: 8px;
+}
+.card-news-card-body li::before {
+  content: '•';
+  color: var(--sapphire);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.card-news-card-body li:last-child { border-bottom: none; }
+.card-news-card-body strong { color: var(--gray-900); font-weight: 600; }
+
+/* ── 소설 ───────────────────────────── */
+.prose-view {
+  font-size: 17px;
+  line-height: 2;
+  color: var(--gray-900);
+}
+
+.prose-novel { font-family: 'Georgia', 'Nanum Myeongjo', serif; }
+.prose-fairy_tale { font-size: 16px; line-height: 1.95; }
+
+.prose-h1 { font-size: 24px; font-weight: 800; margin: 0 0 24px; }
+.prose-h2 { font-size: 19px; font-weight: 700; margin: 32px 0 14px; color: var(--sapphire); }
+.prose-h3 { font-size: 16px; font-weight: 700; margin: 24px 0 10px; }
+
+.prose-p {
+  margin-bottom: 24px;
+  word-break: keep-all;
+}
+
+.prose-novel .prose-p:first-of-type::first-letter {
+  font-size: 3em;
+  font-weight: 700;
+  float: left;
+  line-height: 0.85;
+  margin: 4px 8px 0 0;
+  color: var(--sapphire);
+}
+
+.prose-blockquote {
+  border-left: 3px solid var(--sapphire);
+  padding: 12px 20px;
+  margin: 24px 0;
+  color: var(--gray-600);
+  font-style: italic;
+  background: var(--sapphire-pale);
+  border-radius: 0 8px 8px 0;
+}
+
+.prose-ul, .prose-ol { padding-left: 24px; margin-bottom: 20px; }
+.prose-ul li, .prose-ol li { margin-bottom: 8px; }
+
+/* ── 동화 강조 스타일 ───────────────────────────── */
+.prose-fairy_tale .prose-p { color: var(--gray-800); }
