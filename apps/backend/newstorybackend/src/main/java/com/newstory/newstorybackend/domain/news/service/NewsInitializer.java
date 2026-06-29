@@ -15,8 +15,8 @@ public class NewsInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("앱 시작 - 뉴스 초기 수집 시작");
+        log.info("앱 시작 - 뉴스 수집 시작");
         newsService.collectNews(20);
-        log.info("앱 시작 - 뉴스 초기 수집 완료");
+        log.info("앱 시작 - 뉴스 수집 완료");
     }
 }

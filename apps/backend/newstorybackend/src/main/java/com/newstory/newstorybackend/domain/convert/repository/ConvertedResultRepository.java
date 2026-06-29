@@ -1,6 +1,8 @@
 package com.newstory.newstorybackend.domain.convert.repository;
 
 import com.newstory.newstorybackend.domain.convert.entity.ConvertedResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -15,4 +17,6 @@ public interface ConvertedResultRepository extends JpaRepository<ConvertedResult
     );
 
     List<ConvertedResult> findByIsFeedTrueAndStyleOrderByCreatedAtDesc(String style);
+
+    Page<ConvertedResult> findByIsFeedTrueAndStyleOrderByCreatedAtDesc(String style, Pageable pageable);
 }

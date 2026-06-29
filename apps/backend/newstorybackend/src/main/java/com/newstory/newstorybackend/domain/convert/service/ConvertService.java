@@ -1,6 +1,7 @@
 package com.newstory.newstorybackend.domain.convert.service;
 
 import com.newstory.newstorybackend.domain.ai.client.ClaudeApiClient;
+import com.newstory.newstorybackend.domain.ai.client.GemmaApiClient;
 import com.newstory.newstorybackend.domain.ai.dto.VerificationResult;
 import com.newstory.newstorybackend.domain.convert.dto.ConvertRequest;
 import com.newstory.newstorybackend.domain.convert.dto.ConvertResponse;
@@ -29,6 +30,7 @@ public class ConvertService {
     private static final int MAX_RETRY = 3;
 
     private final CrawlingService crawlingService;
+    private final GemmaApiClient gemmaApiClient;
     private final ClaudeApiClient claudeApiClient;
     private final NewsArticleRepository newsArticleRepository;
     private final ConvertedResultRepository convertedResultRepository;
@@ -36,7 +38,8 @@ public class ConvertService {
     public OriginalArticleResponse getOriginal(String url) {
         CrawledArticle article = crawlingService.crawl(url);
         return new OriginalArticleResponse(
-                article.getTitle(), article.getContent(), article.getOriginalUrl());
+                article.getTitle(), article.getContent(), article.getContentHtml(),
+                article.getOriginalUrl(), article.getImageUrls());
     }
 
     @Transactional
@@ -61,7 +64,15 @@ public class ConvertService {
                     ? crawled.getContent()
                     : crawled.getContent() + "\n\n[이전 변환에서 발견된 문제 — 반드시 수정할 것]\n" + issues;
 
-            convertedText = claudeApiClient.convert(prompt, request.getStyle());
+            try {
+                convertedText = gemmaApiClient.convert(prompt, request.getStyle());
+            } catch (Exception e) {
+                log.warn("Gemma 실패, Claude로 fallback: {}", e.getMessage());
+                convertedText = claudeApiClient.convert(crawled.getContent(), request.getStyle());
+                verificationPassed = true;
+                break;
+            }
+
             VerificationResult result = claudeApiClient.verify(crawled.getContent(), convertedText);
 
             if (result.isPassed()) {
@@ -75,7 +86,8 @@ public class ConvertService {
         }
 
         if (!verificationPassed) {
-            throw new BusinessException("변환 중 오류가 발생했습니다. 다시 시도해 주세요.", HttpStatus.INTERNAL_SERVER_ERROR);
+            log.warn("Gemma 검증 최종 실패, Claude로 fallback");
+            convertedText = claudeApiClient.convert(crawled.getContent(), request.getStyle());
         }
 
         ConvertedResult result = ConvertedResult.builder()

@@ -1,6 +1,7 @@
 package com.newstory.newstorybackend.domain.scheduler;
 
 import com.newstory.newstorybackend.domain.ai.client.ClaudeApiClient;
+import com.newstory.newstorybackend.domain.ai.client.GemmaApiClient;
 import com.newstory.newstorybackend.domain.ai.dto.VerificationResult;
 import com.newstory.newstorybackend.domain.convert.entity.ConvertedResult;
 import com.newstory.newstorybackend.domain.convert.repository.ConvertedResultRepository;
@@ -16,7 +17,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Component
@@ -29,11 +34,12 @@ public class NewsScheduler {
 
     private final NaverNewsClient naverNewsClient;
     private final CrawlingService crawlingService;
+    private final GemmaApiClient gemmaApiClient;
     private final ClaudeApiClient claudeApiClient;
     private final NewsArticleRepository newsArticleRepository;
     private final ConvertedResultRepository convertedResultRepository;
 
-    @Scheduled(cron = "0 0 6 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     @Transactional
     public void collectAndConvert() {
         log.info("뉴스 자동 수집 스케줄러 시작");
@@ -43,10 +49,19 @@ public class NewsScheduler {
 
         int successCount = 0;
 
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+
         for (NewsItem item : newsItems) {
             try {
                 if (newsArticleRepository.existsByUrl(item.getUrl())) {
                     log.debug("이미 수집된 URL 건너뜀: {}", item.getUrl());
+                    continue;
+                }
+
+                // 7일 이상 오래된 기사 스킵
+                LocalDateTime pubDate = parsePubDate(item.getPubDate());
+                if (pubDate != null && pubDate.isBefore(sevenDaysAgo)) {
+                    log.debug("오래된 기사 스킵: {}", item.getUrl());
                     continue;
                 }
 
@@ -57,7 +72,8 @@ public class NewsScheduler {
                                 .url(item.getUrl())
                                 .title(crawled.getTitle())
                                 .description(item.getDescription())
-                                .source(item.getUrl())
+                                .source(extractSource(item.getUrl()))
+                                .publishedAt(parsePubDate(item.getPubDate()))
                                 .build()
                 );
 
@@ -86,7 +102,15 @@ public class NewsScheduler {
                     ? content
                     : content + "\n\n[수정 필요 사항]\n" + issues;
 
-            convertedText = claudeApiClient.convert(prompt, style);
+            try {
+                convertedText = gemmaApiClient.convert(prompt, style);
+            } catch (Exception e) {
+                log.warn("스케줄러 Gemma 실패, Claude로 fallback: {}", e.getMessage());
+                convertedText = claudeApiClient.convert(content, style);
+                passed = true;
+                break;
+            }
+
             VerificationResult result = claudeApiClient.verify(content, convertedText);
 
             if (result.isPassed()) {
@@ -99,8 +123,8 @@ public class NewsScheduler {
         }
 
         if (!passed) {
-            log.warn("스케줄러 변환 검증 실패 - articleId: {}, style: {}", article.getId(), style);
-            return;
+            log.warn("스케줄러 Gemma 검증 실패, Claude로 fallback - articleId: {}, style: {}", article.getId(), style);
+            convertedText = claudeApiClient.convert(content, style);
         }
 
         convertedResultRepository.save(
@@ -114,5 +138,26 @@ public class NewsScheduler {
                         .isFeed(true)
                         .build()
         );
+    }
+
+    private LocalDateTime parsePubDate(String pubDate) {
+        if (pubDate == null || pubDate.isBlank()) return null;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+            return ZonedDateTime.parse(pubDate, formatter).toLocalDateTime();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String extractSource(String url) {
+        if (url == null) return null;
+        try {
+            String host = new java.net.URL(url).getHost();
+            if (host == null) return null;
+            return host.replace("www.", "");
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
