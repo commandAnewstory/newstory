@@ -10,7 +10,7 @@ dist/
 target/
 .gradle/
 build/
-**/src/main/resources/application.yml
+**/src/main/resources/application-local.yml
 
 # Python
 __pycache__/
@@ -26,3 +26,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# 배포 보안 정보 (절대 커밋 금지)
+/CLAUDE.md

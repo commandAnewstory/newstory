@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: newstorybackend
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/newstory}
+    username: ${SPRING_DATASOURCE_USERNAME:han-yejun}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-expiration: 3600000
+  refresh-expiration: 604800000
+
+naver:
+  client-id: ${NAVER_CLIENT_ID:Ka_5maO4ZEbc2XBVPXum}
+  client-secret: ${NAVER_CLIENT_SECRET:RAFhfcwS35}
+  news-api-url: https://openapi.naver.com/v1/search/news.json
+
+claude:
+  api-key: ${CLAUDE_API_KEY}
+
+gemma:
+  api-url: ${GEMMA_API_URL:https://prisoners-defendant-crm-drove.trycloudflare.com/convert}
